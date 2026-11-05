@@ -11,10 +11,10 @@ restapi:
   cafile: [CA_FILE]
   verify_client: required
 
-  ctl:
-    certfile: [CERT_FILE]
-    keyfile: [KEY_FILE]
-    cafile: [CA_FILE]
+ctl:
+  certfile: [CERT_FILE]
+  keyfile: [KEY_FILE]
+  cafile: [CA_FILE]
 
 etcd3:
   hosts: [IP1]:2379,[IP2]:2379,[IP3]:2379
