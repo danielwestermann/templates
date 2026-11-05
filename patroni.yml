@@ -1,0 +1,156 @@
+scope: [CLUSTER_NAME]
+name: [NODE_NAME]
+
+restapi:
+  listen: [LOCAL_IP]:8008
+  connect_address: [LOCAL_IP]:8008
+  allowlist: [IP1],[IP2],[IP3]
+  allowlist_include_members: true
+  certfile: [CERT_FILE]
+  keyfile: [KEY_FILE]
+  cafile: [CA_FILE]
+  verify_client: required
+
+  ctl:
+   certfile: [CERT_FILE]
+   keyfile: [KEY_FILE]
+   cafile: [CA_FILE]
+
+etcd3:
+  hosts: [IP1]:2379,[IP2]:2379,[IP3]:2379
+  protocol: https
+  cacert: [CA_FILE]
+  cert: [CERT_FILE]
+  key: [KEY_FILE]
+#  username: patroni
+#  password: admin123
+
+bootstrap:
+  dcs:
+    ttl: 30
+    loop_wait: 10
+    retry_timeout: 10
+    maximum_lag_on_failover: 1048576
+    # maximum_lag_on_syncnode: 1048576
+    # max_timelines_history: 0
+    # primary_start_timeout: 300
+    # primary_stop_timeout: 300
+    # synchronous_mode_strict: true
+    # synchronous_mode: true
+    # synchronous_node_count: 2
+    # failsafe_mode: false
+    postgresql:
+      use_pg_rewind: true
+      use_slots: true
+      parameters:
+        hot_standby: "on"
+        max_replication_slots: 10
+        listen_addresses: '*'
+        port: 5432
+        logging_collector: 'on'
+        log_truncate_on_rotation: 'on'
+        log_filename: 'postgresql-%a.log'
+        log_rotation_age: '1440'
+        log_line_prefix: '%m - %l - %p - %h - %u@%d - %x'
+        log_directory: 'pg_log'
+        log_min_messages: 'WARNING'
+        log_autovacuum_min_duration: '60s'
+        log_min_error_statement: 'NOTICE'
+        log_min_duration_statement: '30s'
+        log_checkpoints: 'on'
+        log_statement: 'ddl'
+        log_lock_waits: 'on'
+        log_temp_files: '16MB'
+        log_timezone: 'Europe/Zurich'
+        log_connections: 'off'
+        log_disconnections: 'off'
+        log_duration: 'off'
+        client_min_messages: 'WARNING'
+        wal_level: 'replica'
+        hot_standby_feedback: 'on'
+        cluster_name: 'PG1'
+        shared_buffers: '128MB'
+        work_mem: '8MB'
+        effective_cache_size: '512MB'
+        maintenance_work_mem: '64MB'
+        wal_compression: 'lz4'
+        max_wal_senders: '20'
+        shared_preload_libraries: 'pg_stat_statements'
+        autovacuum_max_workers: '6'
+        autovacuum_vacuum_scale_factor: '0.1'
+        autovacuum_vacuum_threshold: '50'
+        autovacuum_vacuum_cost_limit: '3000'
+        archive_mode: 'on'
+        archive_command: '/bin/true'
+        wal_log_hints: 'on'
+        password_encryption: 'scram-sha-256'
+        checkpoint_timeout: '20min'
+        checkpoint_completion_target: '0.9'
+        default_toast_compression: 'lz4'
+        random_page_cost: '1.1'
+        geqo_threshold: 24
+        io_method: 'worker'
+        io_max_combine_limit: '1MB'
+        io_combine_limit: '1MB'
+        min_dynamic_shared_memory: '128MB'
+  initdb:
+  - encoding: UTF8
+  - data-checksums
+  - wal-segsize: '64'
+  - auth-local: peer
+  - auth-host: scram-sha-256
+  pg_hba:
+  - local all         all                          peer
+  - host  replication replicator [IP1]/32 scram-sha-256
+  - host  replication replicator [IP2]/32 scram-sha-256
+  - host  replication replicator [IP3]/32 scram-sha-256
+  - host  all         all        [IP1]/32 scram-sha-256
+  - host  all         all        [IP2]/32 scram-sha-256
+  - host  all         all        [IP3]/32 scram-sha-256
+  users:
+    admin:
+      password: admin
+      options:
+        - createrole
+        - createdb
+    replicator:
+      password: postgres
+      options:
+        - superuser
+
+postgresql:
+  listen: [LOCAL_IP]:5432
+  connect_address: [LOCAL_IP]:5432
+  data_dir: /var/lib/pgsql/18/data/
+  bin_dir: /usr/pgsql-18/bin/
+  pgpass: /var/lib/pgsql/pgpass0
+  authentication:
+    replication:
+      username: replicator
+      password: postgres
+    superuser:
+      username: postgres
+      password: postgres
+
+watchdog:
+  mode: automatic # Allowed values: off, automatic, required
+  device: /dev/watchdog
+  safety_margin: 5
+
+log:
+  type: plain
+  level: WARNING
+  dir: /var/log/patroni/
+  file_num: 7
+  file_size: 1073741824
+
+tags:
+  nofailover: false
+  noloadbalance: false
+  clonefrom: false
+  nosync: false
+  # sync_priority: 1
+  # failover_priority: 1
+  # nostream: false/true
+  # replicatefrom: [name_of_another_replica]
+
