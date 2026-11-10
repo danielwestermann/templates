@@ -22,8 +22,8 @@ etcd3:
   cacert: [CA_FILE]
   cert: [CERT_FILE]
   key: [KEY_FILE]
-#  username: patroni
-#  password: admin123
+  username: patroni
+  password: postgres
 
 bootstrap:
   dcs:
