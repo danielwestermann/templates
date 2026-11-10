@@ -26,8 +26,8 @@ etcd3:
   hosts: [IP1]:2379,[IP2]:2379,[IP3]:2379
   protocol: https
   cacert: [CA_FILE]
-  cert: [CERT_FILE]
-  key: [KEY_FILE]
+  cert: [CLIENT_CERT_FILE]
+  key: [CLIENT_KEY_FILE]
   username: patroni
   password: postgres
 
