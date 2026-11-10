@@ -17,7 +17,7 @@ restapi:
 ctl:
   authentication:
     username: patroni
-    passwprd: postgres
+    password: postgres
   certfile: [CERT_FILE]
   keyfile: [KEY_FILE]
   cafile: [CA_FILE]
